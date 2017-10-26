@@ -8,7 +8,7 @@ module.exports = function(app, passport) {
     // handle the callback after twitter has authenticated the user
     app.get('/auth/twitter/callback',
         passport.authenticate('twitter', {
-            successRedirect : 'https://d0tkom-voting.herokuapp.com/mypolls',
+            successRedirect : 'https://localhost:3000',
             failureRedirect : '/error'
         }));
 }

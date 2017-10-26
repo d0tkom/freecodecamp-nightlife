@@ -1,4 +1,6 @@
+require('dotenv').config();
 require('./database');
+require('./yelp');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -10,7 +12,7 @@ var flash    = require('connect-flash');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var polls = require('./routes/polls');
+var bars = require('./routes/bars');
 var auth = require('./routes/auth');
 
 var session = require('express-session');
@@ -41,7 +43,7 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 
 index(app, passport);
 users(app, passport);
-polls(app, passport);
+bars(app, passport);
 auth(app, passport);
 
 app.get('*', (req, res) => {

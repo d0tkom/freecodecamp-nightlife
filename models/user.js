@@ -7,7 +7,8 @@ var userSchema = new Schema({
 		displayName: String,
 		username: String,
 		email: String
-	}
+	},
+	lastSearch: { type: 'String' }
 });
 
 module.exports = mongoose.model('User', userSchema);
