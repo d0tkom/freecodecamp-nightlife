@@ -42,31 +42,29 @@ module.exports = function(app, passport) {
         client.search({
             location: term
         }).then(response => {
+            let finished = 0;
             //TODO merge businesses with votes from db
-            var arr = response.jsonBody.businesses;
-            var len = arr.length;
-            for (var i = 0; i < len; i++) {
-                let ind = i;
-                Bar.findOne({yelpId: arr[ind].id}).exec((err, bar) => {
+            let arr = response.jsonBody.businesses;
+            let len = arr.length;
+            for (let i = 0; i < len; i++) {
+                Bar.findOne({yelpId: arr[i].id}).exec((err, bar) => {
                     if (err) {
                         throw err;
-                        //res.status(500).send(err);
                     }
                     if (!bar) {
-                        arr[ind].going = new Array();
+                        arr[i].going = [];
                     }
                     else {
-                        console.log('found bar');
-                        arr[ind].going = bar.going;
+                        arr[i].going = bar.going;
                     }
 
-                    if (ind == len-1) {
+                    finished++;
+                    if (finished == len) {
                         res.json({businesses: arr});
                     }
                 })
             }
         }).catch(e => {
-            console.log(e);
             res.send(e);
         });
     });
