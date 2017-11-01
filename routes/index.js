@@ -45,26 +45,26 @@ module.exports = function(app, passport) {
             //TODO merge businesses with votes from db
             var arr = response.jsonBody.businesses;
             var len = arr.length;
-            for (var i = 0; i < len-1; i++) {
-                var item = arr[i];
-                console.log(item.id);
-                Bar.findOne({yelpId: item.id}).exec((err, bar) => {
+            for (var i = 0; i < len; i++) {
+                let ind = i;
+                Bar.findOne({yelpId: arr[ind].id}).exec((err, bar) => {
                     if (err) {
-                        console.log("err");
-                        res.status(500).send(err);
+                        throw err;
+                        //res.status(500).send(err);
                     }
                     if (!bar) {
-                        console.log('did not find bar');
-                        arr[i].going = bar.going;
+                        arr[ind].going = new Array();
                     }
                     else {
                         console.log('found bar');
-                        arr[i].going = bar.going;
-                        //res.json({businesses: arr});   
+                        arr[ind].going = bar.going;
+                    }
+
+                    if (ind == len-1) {
+                        res.json({businesses: arr});
                     }
                 })
             }
-            res.json({businesses: arr});   
         }).catch(e => {
             console.log(e);
             res.send(e);
