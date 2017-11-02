@@ -10,7 +10,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    //this.getPolls('/api/polls');
     this.getUser();
 
     if (localStorage.getItem("_freecodecamp_text") != null) {
