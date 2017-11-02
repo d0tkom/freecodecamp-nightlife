@@ -11,7 +11,14 @@ class App extends Component {
 
   componentDidMount() {
     //this.getPolls('/api/polls');
-    //this.getUser();
+    this.getUser();
+
+    if (localStorage.getItem("_freecodecamp_text") != null) {
+      var text = localStorage.getItem("_freecodecamp_text");
+      this.setState({text: text});
+      this.searchBars(text);
+    }
+    
   }
   
   isLoggedIn = () => {
@@ -19,54 +26,39 @@ class App extends Component {
   }
   
   getUser = () => {
-    this.setState({isLoading: true});
     fetch('/user', {credentials: 'include'})
       .then((res) => {
         if (!res.redirected) {
           return res.json(); 
         }
-        console.log('not logged in');
       }).then((data) => {
-        console.log(data);
-        this.setState({user: data, isLoading: false});
-        console.log(data);
-      })
-  }
-  
-  getPolls = (str) => {
-    this.setState({isLoading: true});
-    fetch(str, {credentials: 'include'})
-      .then((res) => {
-        return res.json();
-      }).then((data) => {
-        this.setState({polls: data.polls, isLoading: false});
+        this.setState({user: data});
+        console.log("userId: " + data._id);
       })
   }
 
-  submitPoll = (event) => {
-    event.preventDefault();
-    this.setState({isLoading: true});
-    fetch('/api/polls', {
-      headers: { 'content-type': 'application/json' },
-      method: "post",
-      body: JSON.stringify({poll: this.state.newPoll}),
+  willGoWontGo = (id, going) => {
+    if (!this.isLoggedIn()) {
+      window.location.replace('/auth/twitter');
+      return;
+    }
+    var check = going.findIndex((id) => {return id == this.state.user._id});
+    let method;
+    if (check == -1) {
+      method = "PUT";
+    }
+    else {
+      method = "DELETE";
+    }
+    fetch('/api/bars/' + id, {
+      method: method,
       credentials: 'include'
     })
-    .then(response => response.json().then(json => ({ json, response })))
-    .then(({ json, response }) => {
-      if (!response.ok) {
-        return Promise.reject(json);
+    .then((response) => {
+      if (response.status == 200) {
+        this.searchBars(this.state.text);
       }
-      this.getPolls('/api/polls');
-      console.log(json);
-      this.setState({poll: json.poll, isLoading: false});
-      this.pollDataToChartData(json.poll);
-      return json;
-    })
-    .then(
-      response => response,
-      error => error
-    );
+    });
   }
 
   searchBars = (location) => {
@@ -82,6 +74,7 @@ class App extends Component {
   submitForm = (event) => {
     event.preventDefault();
     this.searchBars(this.state.text);
+    localStorage.setItem("_freecodecamp_text", this.state.text);
   }
 
   handleChange = (event) => {
@@ -112,7 +105,7 @@ class App extends Component {
         return <div>
           {item.name}
           {" "}
-          <Button>{item.going ? item.going.length : "err"} Going</Button>
+          <Button onClick={() => { this.willGoWontGo(item.id, item.going) }}>{item.going ? item.going.length : 0} Going</Button>
         </div>
       })}
       </div>

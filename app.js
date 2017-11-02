@@ -11,7 +11,6 @@ var passport = require('passport');
 var flash    = require('connect-flash');
 
 var index = require('./routes/index');
-var users = require('./routes/users');
 var bars = require('./routes/bars');
 var auth = require('./routes/auth');
 
@@ -27,7 +26,7 @@ app.set('view engine', 'jade');
 
 
 // required for passport
-app.use(session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
+app.use(session({ secret: 'sgsgsgsg' })); // session secret
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
@@ -42,7 +41,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 index(app, passport);
-users(app, passport);
 bars(app, passport);
 auth(app, passport);
 

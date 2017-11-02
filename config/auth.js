@@ -2,8 +2,8 @@
 
 module.exports = {
 	'twitterAuth': {
-		'clientID': 'TWITTER_ID',
-		'clientSecret': 'TWITTER_SECRET',
-		'callbackURL': 'https://localhost:3000/com/auth/twitter/callback'
+		'clientID': process.env.TWITTER_ID,
+		'clientSecret': process.env.TWITTER_SECRET,
+		'callbackURL': 'http://127.0.0.1:5000/auth/twitter/callback'
 	}
 };

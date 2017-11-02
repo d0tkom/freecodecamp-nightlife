@@ -5,38 +5,21 @@ const yelp = require('yelp-fusion');
 module.exports = function(app, passport) {
      /* GET home page. */
     app.get('/', function(req, res, next) {
-        console.log(token);
-        
       res.render('index', { title: 'Express' });
     });   
     
     app.get('/user', isLoggedIn, function(req, res) {
+        console.log("get user");
         res.json(req.user);
     });
     
-    app.get('/logout', function(req, res) {
+    app.get('/logout', isLoggedIn, function(req, res) {
         req.logout();
         res.redirect('/');
     });
 
     app.get('/api/search/:term', function(req, res) {
-        console.log(global.token);
         var term = req.params.term;
-        if (req.isAuthenticated()) {
-            // save last search
-            User.findOne({id: req.user.id}).exec((err, user) => {
-                if (err) {
-                  res.status(500).send(err);
-                }
-                user.lastSearch = term;
-                user.save(function (err, updatedUser) {
-                    if (err) {
-                      throw err;
-                    }
-                    console.log("updated user last search: " + updatedUser);
-                });
-            });
-        }
         //do search and return
         const client = yelp.client(global.token);
         client.search({
@@ -69,13 +52,14 @@ module.exports = function(app, passport) {
         });
     });
 
-    app.put('/api/bars/:id', function(req, res) {
+    app.put('/api/bars/:id', isLoggedIn, function(req, res) {
         var id = req.params.id;
-        //var userId = req.user.id;
-        var userId = "hehe";
+        var userId = req.user.id;
+        console.log(userId);
         // if bar doesn't exist in db, create it
         Bar.findOne({ yelpId: id }).exec((err, bar) => {
             if (err) {
+                console.log(err);
               res.status(500).send(err);
             }
 
@@ -84,10 +68,11 @@ module.exports = function(app, passport) {
                 var newBar = new Bar({yelpId: id, going: userId});
                 newBar.save((err, saved) => {
                   if (err) {
+                    console.log(err);
                     res.status(500).send(err);
                   }
                   console.log('saved');
-                  res.send("we've recorded that you're going to " + id);
+                  res.status(200).send("we've recorded that you're going to " + id);
                 });
             }
             else {
@@ -97,7 +82,7 @@ module.exports = function(app, passport) {
                 });
                 if (going.length > 0) {
                     console.log(bar);
-                    res.send("you're going already");
+                    res.status(208).send("you're going already");
                 }
                 else {
                     bar.going.addToSet(userId);
@@ -105,9 +90,10 @@ module.exports = function(app, passport) {
                     
                     bar.save((err, updatedBar) => {
                         if (err) {
+                            console.log(err);
                             res.status(500).send(err);
                         }
-                        res.send("we've recorded that you're going to " + id);
+                        res.status(200).send("we've recorded that you're going to " + id);
                     });
                 }
             }
@@ -115,10 +101,9 @@ module.exports = function(app, passport) {
     });
 
     //delete user from a bar's going array
-    app.delete('/api/bars/:id', function(req, res) {
+    app.delete('/api/bars/:id', isLoggedIn, function(req, res) {
         var id = req.params.id;
-        //var userId = req.user.id;
-        var userId = "hehe";
+        var userId = req.user.id;
         // if bar doesn't exist in db, create it
         Bar.findOne({ yelpId: id }).exec((err, bar) => {
             if (err) {
@@ -127,7 +112,7 @@ module.exports = function(app, passport) {
 
             if(!bar) {
                 //we didn't find bar in db, so we can't ungo
-                res.send("you weren't going anyways");
+                res.status(208).send("you weren't going anyways");
             }
             else {
                 //found bar. check if user has already going
@@ -136,7 +121,7 @@ module.exports = function(app, passport) {
                     return item[0] == userId;
                 });
                 if (going.length == 0) {
-                    res.send("you weren't going anyways");
+                    res.status(208).send("you weren't going anyways");
                 }
                 else {
                     //user is filter array to not include user
@@ -148,7 +133,7 @@ module.exports = function(app, passport) {
                         if (err) {
                             res.status(500).send(err);
                         }
-                        res.send("we've recorded that you're NOT going to " + id + " after all");
+                        res.status(200).send("we've recorded that you're NOT going to " + id + " after all");
                     });
                 }
             }
